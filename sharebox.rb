@@ -33,7 +33,6 @@ sharebox_html = '
 
 			function tryPasting( str )
 			{
-        console.log(str);
 				var result = b64_to_utf8(str);
 				$("#sharebox").val(result);
 			}
@@ -69,6 +68,7 @@ sharebox_html = '
 					error: function (XMLHttpRequest, textStatus, errorThrown) {
 						$("#target").html("error retrieving content");
 						window.needpush = pertain_needpush;
+						window.mutex = 0;
 					}
 				});
 			}
@@ -85,6 +85,7 @@ sharebox_html = '
 
 			});
 
+			$("#target").hide();
 			pushAndPaste("__INIT__");
 		</script>
 	</body>
