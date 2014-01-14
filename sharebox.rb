@@ -92,7 +92,7 @@ sharebox_html = '
 </html>
 '
 
-server = TCPServer.new('localhost', 2345)
+server = TCPServer.new(2345)
 loop do
   Thread.start(server.accept) do |socket|
     response = "Hello world\n"
