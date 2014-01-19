@@ -143,6 +143,8 @@ sharebox_html = '
 				});
 			}
       
+      window.downloadName = "gpFilenameNULL";
+      
       function scanForDownload()
       {
 				$.ajax({
@@ -150,7 +152,10 @@ sharebox_html = '
 					url: "gpFilename",
 					timeout: 2000,
 					success: function(data) {
-						$("#downloadZone").html("<a href=\"gpFileDownload/" + data + "\">" + data + "</a>");
+            if(window.downloadName != data) {
+              window.downloadName = data;
+						  $("#downloadZone").html("<a href=\"gpFileDownload/" + data + "\">" + data + "</a>");
+            }
 					},
 					error: function (XMLHttpRequest, textStatus, errorThrown) {
 					}
