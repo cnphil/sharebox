@@ -3,7 +3,7 @@ require 'thread'
 require 'uri'
 require 'base64'
 
-$sharebox_version = 0.9
+$sharebox_version = "0.9.1.1b"
 $semaphore = Mutex.new
 $fileSemaphore = Mutex.new
 $sharebox = "SGVyZSdzIHRvIHRoZSBjcmF6eSBvbmVzLgpUaGUgbWlzZml0cy4KVGhlIHJlYmVscy4KVGhlIHRyb3VibGVtYWtlcnMuClRoZSByb3VuZCBwZWdzIGluIHRoZSBzcXVhcmUgaG9sZXMuClRoZSBvbmVzIHdobyBzZWUgdGhpbmdzIGRpZmZlcmVudGx5LgpUaGV5J3JlIG5vdCBmb25kIG9mIHJ1bGVzLgpBbmQgdGhleSBoYXZlIG5vIHJlc3BlY3QgZm9yIHRoZSBzdGF0dXMgcXVvLgpZb3UgY2FuIHF1b3RlIHRoZW0sIGRpc2FncmVlIHdpdGggdGhlbSwgZ2xvcmlmeSBvciB2aWxpZnkgdGhlbS4KQWJvdXQgdGhlIG9ubHkgdGhpbmcgeW91IGNhbid0IGRvIGlzIGlnbm9yZSB0aGVtLgpCZWNhdXNlIHRoZXkgY2hhbmdlIHRoaW5ncy4KVGhleSBwdXNoIHRoZSBodW1hbiByYWNlIGZvcndhcmQuCldoaWxlIHNvbWUgc2VlIHRoZW0gYXMgdGhlIGNyYXp5IG9uZXMsIHdlIHNlZSBnZW5pdXMuCkJlY2F1c2UgdGhlIHBlb3BsZSB3aG8gYXJlIGNyYXp5IGVub3VnaCB0byB0aGluawp0aGV5IGNhbiBjaGFuZ2UgdGhlIHdvcmxkLCBhcmUgdGhlIG9uZXMgd2hvIGRvLgo="
@@ -48,10 +48,8 @@ sharebox_html = '
             }
         </style>
 	</head>
-	<body>
-		<form action="/gpFileUpload" class="dropzone" id="sharezone">
+	<body id="sharezone">
 		<h1 id="shareboxTitle">Sharebox</h1>
-		</form>
 		<div>Shared file: <span id="downloadZone"></span></div>
 		<br />
 		<textarea id="sharebox" rows="24" cols="80"></textarea>
@@ -59,14 +57,23 @@ sharebox_html = '
 		<br />
 		<div id="mutexes"></div>
     <div style="color: grey">Sharebox v' + $sharebox_version.to_s() + ' by <a href="http://cnphil.com/" style="color:grey; text-decoration:none">Phil Xiaojun Hu</a></div>
-		<script>
-			Dropzone.options.sharezone = {
+		
+    <!--
+    <form action="/gpFileUpload" class="dropzone" id="sharezone">
+      <div style="width: 100%; height: 100%; background: red; position:absolute; left:0px; top:0px; visibility:hidden;">
+      </div>
+    </form>
+    -->
+    
+    <script>
+      var mySharezone = new Dropzone("#sharezone", {
+				url: "/gpFileUpload",
 				dictDefaultMessage: "",
 				previewsContainer: "#target",
         clickable: "#shareboxTitle",
         uploadprogress: function(file, progress, bytesSent) {
           str = "Sharebox";
-          bef = Math.floor((progress / 100) * str.length);
+          bef = Math.floor((progress / 100) * (str.length - 1));
           bef_str = "<span style=\"color: black\">" + str.substring(0, bef) + "</span>"
           aft_str = "<span style=\"color: grey\">" + str.substring(bef, str.length) + "</span>"
           $("#shareboxTitle").html(bef_str + aft_str);
@@ -88,7 +95,7 @@ sharebox_html = '
 					$("#shareboxTitle").html("Sharebox");
 				},
 				maxThumbnailFilesize: 0
-			};
+			});
 
 			// sharebox text sync below
 			window.mutex = 0;
