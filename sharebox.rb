@@ -3,7 +3,7 @@ require 'thread'
 require 'uri'
 require 'base64'
 
-$sharebox_version = "0.9.1.1b"
+$sharebox_version = "0.9.1.1g"
 $semaphore = Mutex.new
 $fileSemaphore = Mutex.new
 $sharebox = "SGVyZSdzIHRvIHRoZSBjcmF6eSBvbmVzLgpUaGUgbWlzZml0cy4KVGhlIHJlYmVscy4KVGhlIHRyb3VibGVtYWtlcnMuClRoZSByb3VuZCBwZWdzIGluIHRoZSBzcXVhcmUgaG9sZXMuClRoZSBvbmVzIHdobyBzZWUgdGhpbmdzIGRpZmZlcmVudGx5LgpUaGV5J3JlIG5vdCBmb25kIG9mIHJ1bGVzLgpBbmQgdGhleSBoYXZlIG5vIHJlc3BlY3QgZm9yIHRoZSBzdGF0dXMgcXVvLgpZb3UgY2FuIHF1b3RlIHRoZW0sIGRpc2FncmVlIHdpdGggdGhlbSwgZ2xvcmlmeSBvciB2aWxpZnkgdGhlbS4KQWJvdXQgdGhlIG9ubHkgdGhpbmcgeW91IGNhbid0IGRvIGlzIGlnbm9yZSB0aGVtLgpCZWNhdXNlIHRoZXkgY2hhbmdlIHRoaW5ncy4KVGhleSBwdXNoIHRoZSBodW1hbiByYWNlIGZvcndhcmQuCldoaWxlIHNvbWUgc2VlIHRoZW0gYXMgdGhlIGNyYXp5IG9uZXMsIHdlIHNlZSBnZW5pdXMuCkJlY2F1c2UgdGhlIHBlb3BsZSB3aG8gYXJlIGNyYXp5IGVub3VnaCB0byB0aGluawp0aGV5IGNhbiBjaGFuZ2UgdGhlIHdvcmxkLCBhcmUgdGhlIG9uZXMgd2hvIGRvLgo="
@@ -48,22 +48,33 @@ sharebox_html = '
             }
         </style>
 	</head>
-	<body id="sharezone">
-		<h1 id="shareboxTitle">Sharebox</h1>
-		<div>Shared file: <span id="downloadZone"></span></div>
-		<br />
-		<textarea id="sharebox" rows="24" cols="80"></textarea>
-		<div id="target"></div>
-		<br />
-		<div id="mutexes"></div>
-    <div style="color: grey">Sharebox v' + $sharebox_version.to_s() + ' by <a href="http://cnphil.com/" style="color:grey; text-decoration:none">Phil Xiaojun Hu</a></div>
-		
-    <!--
-    <form action="/gpFileUpload" class="dropzone" id="sharezone">
-      <div style="width: 100%; height: 100%; background: red; position:absolute; left:0px; top:0px; visibility:hidden;">
+	<body>
+    <div id="sharezone" style="width: 100%; height: 100%; position:absolute; left:0px; top:0px;">
+      <div style="position:absolute; left:10px; top:0px;">
+    		<h1 id="shareboxTitle">Sharebox</h1>
+    		<div>Shared file: <span id="downloadZone"></span></div>
+    		<br />
+        <div id="targetPosition"></div>
       </div>
-    </form>
-    -->
+    </div>
+    
+    
+    <div id="mycontent" style="">
+  		<textarea id="sharebox" rows="24" cols="80"></textarea>
+  		<div id="target"></div>
+  		<br />
+  		<div id="mutexes"></div>
+      <div style="color: grey">Sharebox v' + $sharebox_version.to_s() + ' by <a href="http://cnphil.com/" style="color:grey; text-decoration:none">Phil Xiaojun Hu</a></div>
+		
+      <!--
+      <form action="/gpFileUpload" class="dropzone" id="sharezone">
+        <div style="width: 100%; height: 100%; position:absolute; left:0px; top:0px; visibility:hidden;">
+        </div>
+      </form>
+      -->
+    
+    </div>
+    
     
     <script>
       var mySharezone = new Dropzone("#sharezone", {
@@ -96,6 +107,11 @@ sharebox_html = '
 				},
 				maxThumbnailFilesize: 0
 			});
+      
+      if($("input").attr("multiple") != null) {
+        $("input").removeAttr("multiple");
+      }
+      $("input").attr("capture", "camera");
 
 			// sharebox text sync below
 			window.mutex = 0;
@@ -154,7 +170,7 @@ sharebox_html = '
 					success: function(data) {
             if(window.downloadName != data) {
               window.downloadName = data;
-						  $("#downloadZone").html("<a href=\"gpFileDownload/" + data + "\">" + data + "</a>");
+						  $("#downloadZone").html("<a target=\"_blank\" href=\"gpFileDownload/" + data + "\">" + data + "</a>");
             }
 					},
 					error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -163,6 +179,9 @@ sharebox_html = '
       }
 
 			$(document).ready(function() {
+        var mypos = $("#targetPosition").position()
+        $("#mycontent").attr("style", "position:absolute; left:" + (mypos.left + 15) + "px; top:" + mypos.top + "px;");
+        
 				setInterval(function() {
 					pushAndPaste($("#sharebox").val());
 				}, 1000);
