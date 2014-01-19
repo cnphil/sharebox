@@ -4,7 +4,7 @@ require 'uri'
 require 'base64'
 require 'securerandom'
 
-$sharebox_version = "0.9.1.1n"
+$sharebox_version = "0.9.1.1ac"
 $semaphore = Mutex.new
 $fileSemaphore = Mutex.new
 $sharebox = "SGVyZSdzIHRvIHRoZSBjcmF6eSBvbmVzLgpUaGUgbWlzZml0cy4KVGhlIHJlYmVscy4KVGhlIHRyb3VibGVtYWtlcnMuClRoZSByb3VuZCBwZWdzIGluIHRoZSBzcXVhcmUgaG9sZXMuClRoZSBvbmVzIHdobyBzZWUgdGhpbmdzIGRpZmZlcmVudGx5LgpUaGV5J3JlIG5vdCBmb25kIG9mIHJ1bGVzLgpBbmQgdGhleSBoYXZlIG5vIHJlc3BlY3QgZm9yIHRoZSBzdGF0dXMgcXVvLgpZb3UgY2FuIHF1b3RlIHRoZW0sIGRpc2FncmVlIHdpdGggdGhlbSwgZ2xvcmlmeSBvciB2aWxpZnkgdGhlbS4KQWJvdXQgdGhlIG9ubHkgdGhpbmcgeW91IGNhbid0IGRvIGlzIGlnbm9yZSB0aGVtLgpCZWNhdXNlIHRoZXkgY2hhbmdlIHRoaW5ncy4KVGhleSBwdXNoIHRoZSBodW1hbiByYWNlIGZvcndhcmQuCldoaWxlIHNvbWUgc2VlIHRoZW0gYXMgdGhlIGNyYXp5IG9uZXMsIHdlIHNlZSBnZW5pdXMuCkJlY2F1c2UgdGhlIHBlb3BsZSB3aG8gYXJlIGNyYXp5IGVub3VnaCB0byB0aGluawp0aGV5IGNhbiBjaGFuZ2UgdGhlIHdvcmxkLCBhcmUgdGhlIG9uZXMgd2hvIGRvLgo="
@@ -335,7 +335,9 @@ def handleFileDownload(socket, request_file)
   end
 end
 
-server = TCPServer.new(2345)
+port = 2345
+port = ARGV[0].to_i if ARGV[0].to_i.to_s == ARGV[0]
+server = TCPServer.new(port)
 loop do
   Thread.start(server.accept) do |socket|
     first_line = 1
