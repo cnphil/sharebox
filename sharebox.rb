@@ -4,7 +4,7 @@ require 'uri'
 require 'base64'
 require 'securerandom'
 
-$sharebox_version = "0.9.1.1ac"
+$sharebox_version = "0.9.2.1a"
 $semaphore = Mutex.new
 $fileSemaphore = Mutex.new
 $sharebox = "SGVyZSdzIHRvIHRoZSBjcmF6eSBvbmVzLgpUaGUgbWlzZml0cy4KVGhlIHJlYmVscy4KVGhlIHRyb3VibGVtYWtlcnMuClRoZSByb3VuZCBwZWdzIGluIHRoZSBzcXVhcmUgaG9sZXMuClRoZSBvbmVzIHdobyBzZWUgdGhpbmdzIGRpZmZlcmVudGx5LgpUaGV5J3JlIG5vdCBmb25kIG9mIHJ1bGVzLgpBbmQgdGhleSBoYXZlIG5vIHJlc3BlY3QgZm9yIHRoZSBzdGF0dXMgcXVvLgpZb3UgY2FuIHF1b3RlIHRoZW0sIGRpc2FncmVlIHdpdGggdGhlbSwgZ2xvcmlmeSBvciB2aWxpZnkgdGhlbS4KQWJvdXQgdGhlIG9ubHkgdGhpbmcgeW91IGNhbid0IGRvIGlzIGlnbm9yZSB0aGVtLgpCZWNhdXNlIHRoZXkgY2hhbmdlIHRoaW5ncy4KVGhleSBwdXNoIHRoZSBodW1hbiByYWNlIGZvcndhcmQuCldoaWxlIHNvbWUgc2VlIHRoZW0gYXMgdGhlIGNyYXp5IG9uZXMsIHdlIHNlZSBnZW5pdXMuCkJlY2F1c2UgdGhlIHBlb3BsZSB3aG8gYXJlIGNyYXp5IGVub3VnaCB0byB0aGluawp0aGV5IGNhbiBjaGFuZ2UgdGhlIHdvcmxkLCBhcmUgdGhlIG9uZXMgd2hvIGRvLgo="
@@ -237,6 +237,8 @@ sharebox_html = '
         var myheight = $("#sharebox").height()
         $("#imagePreview").attr("style", "position:absolute; height: " + Math.floor(myheight * 0.87) + "px; width:" + Math.floor(mywidth * 0.66) + "px; left:" + (mypos.left + 70 + mywidth) + "px; top:" + (mypos.top + Math.floor(myheight * 0.05)) + "px;");
         $("#imagePreview").hide();
+        
+        $.ajaxSetup({ cache: false });
         
 				setInterval(function() {
 					pushAndPaste($("#sharebox").val());
