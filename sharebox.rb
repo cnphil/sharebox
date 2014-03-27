@@ -4,7 +4,7 @@ require 'uri'
 require 'base64'
 require 'securerandom'
 
-$sharebox_version = "0.9.3.2"
+$sharebox_version = "0.9.3.3"
 $semaphore = Mutex.new
 $fileSemaphore = Mutex.new
 $sharebox = "SGVyZSdzIHRvIHRoZSBjcmF6eSBvbmVzLgpUaGUgbWlzZml0cy4KVGhlIHJlYmVscy4KVGhlIHRyb3VibGVtYWtlcnMuClRoZSByb3VuZCBwZWdzIGluIHRoZSBzcXVhcmUgaG9sZXMuClRoZSBvbmVzIHdobyBzZWUgdGhpbmdzIGRpZmZlcmVudGx5LgpUaGV5J3JlIG5vdCBmb25kIG9mIHJ1bGVzLgpBbmQgdGhleSBoYXZlIG5vIHJlc3BlY3QgZm9yIHRoZSBzdGF0dXMgcXVvLgpZb3UgY2FuIHF1b3RlIHRoZW0sIGRpc2FncmVlIHdpdGggdGhlbSwgZ2xvcmlmeSBvciB2aWxpZnkgdGhlbS4KQWJvdXQgdGhlIG9ubHkgdGhpbmcgeW91IGNhbid0IGRvIGlzIGlnbm9yZSB0aGVtLgpCZWNhdXNlIHRoZXkgY2hhbmdlIHRoaW5ncy4KVGhleSBwdXNoIHRoZSBodW1hbiByYWNlIGZvcndhcmQuCldoaWxlIHNvbWUgc2VlIHRoZW0gYXMgdGhlIGNyYXp5IG9uZXMsIHdlIHNlZSBnZW5pdXMuCkJlY2F1c2UgdGhlIHBlb3BsZSB3aG8gYXJlIGNyYXp5IGVub3VnaCB0byB0aGluawp0aGV5IGNhbiBjaGFuZ2UgdGhlIHdvcmxkLCBhcmUgdGhlIG9uZXMgd2hvIGRvLgo="
@@ -58,9 +58,10 @@ def handleGPClipboard(socket, request)
 end
 
 def friendly_filename(filename)
-  filename.gsub(/[^\w\s\._-]+/, '')
-    .gsub(/(^|\b\s)\s+($|\s?\b)/, '\\1\\2')
-    .gsub(/\s+/, '_')
+  filename
+  #.gsub(/[^\w\s\._-]+/, '')
+  #.gsub(/(^|\b\s)\s+($|\s?\b)/, '\\1\\2')
+  #.gsub(/\s+/, '_')
 end
 
 def handleGPFileUpload(socket, request, boundary)

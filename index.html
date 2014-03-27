@@ -188,7 +188,9 @@
               
               window.filesrc = "gpFileDownload/" + data;
               
-						  $("#downloadZone").html("<a target=\"_blank\" href=\"" + window.filesrc + "\">" + fileNameFromPath(window.downloadName) + "</a>");
+						  $("#downloadZone").html("<a id='downloadLink' target=\"_blank\" href=\"" + "\">" + "</a>");
+						  $("#downloadLink").text(fileNameFromPath(window.downloadName));
+						  $("#downloadLink").attr("href", window.filesrc);
               
               $("#imagePreview").fadeOut(400, function() {
                 if(fileLooksLikeImage(window.filesrc)) {isValidImageUrl();}
