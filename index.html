@@ -1,0 +1,233 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="/jquery.js"></script>
+		<script>
+			function utf8_to_b64( str ) {
+			  return window.btoa(unescape(encodeURIComponent( str )));
+			}
+
+			function b64_to_utf8( str ) {
+			  return decodeURIComponent(escape(window.atob( str )));
+			}
+		</script>
+		<script src="/dropzone.js"></script>
+		<style type="text/css">
+            .dropzone-div {
+                border: 2px dashed #ccc;
+                width: 300px;
+                height: 200px;
+            }
+        </style>
+	</head>
+	<body>
+    <div id="sharezone" style="width: 100%; height: 100%; position:absolute; left:0px; top:0px;">
+      <div style="position:absolute; left:10px; top:0px;">
+    		<h1 id="shareboxTitle">Sharebox</h1>
+    		<div>Shared file: <span id="downloadZone"></span></div>
+    		<br />
+        <div id="targetPosition"></div>
+        <div id="imagePreview"><a target="_blank" id="tagA" href=""><img id="tagImg" style="width: auto; height: auto; max-width: 100%; max-height: 100%;" src="" /></a></div>
+      </div>
+    </div>
+    
+    
+    <div id="mycontent" style="">
+  		<textarea id="sharebox" rows="24" cols="80"></textarea>
+  		<div id="target"></div>
+  		<br />
+  		<div id="mutexes"></div>
+      <div style="color: grey">Sharebox (<a href="javascript:$('#howto').toggle();" style="text-decoration:none; color: inherit;">HOWTO?</a>) vSHAREBOX_VERSION by <a href="http://cnphil.com/" style="color:grey; text-decoration:none">Phil Xiaojun Hu</a></div> <br /> <div id="howto" style="color: grey; display: none;">Just drag any file onto this page to upload, or, click on 'Sharebox'. Mobile devices also supported.</div>
+		
+      <!--
+      <form action="/gpFileUpload" class="dropzone" id="sharezone">
+        <div style="width: 100%; height: 100%; position:absolute; left:0px; top:0px; visibility:hidden;">
+        </div>
+      </form>
+      -->
+    
+    </div>
+    
+    
+    <script>
+      var mySharezone = new Dropzone("#sharezone", {
+				url: "/gpFileUpload",
+				dictDefaultMessage: "",
+				previewsContainer: "#target",
+        clickable: "#shareboxTitle",
+        uploadprogress: function(file, progress, bytesSent) {
+          str = "Sharebox";
+          bef = Math.floor((progress / 100) * (str.length - 1));
+          bef_str = "<span style=\"color: black\">" + str.substring(0, bef) + "</span>"
+          aft_str = "<span style=\"color: grey\">" + str.substring(bef, str.length) + "</span>"
+          $("#shareboxTitle").html(bef_str + aft_str);
+        },
+				complete: function(file) {
+          window.stopBlinking = 1;
+          /*setTimeout(function() {
+              window.stopBlinking = true;
+          }, 1000);*/
+          blink("#shareboxTitle");
+
+          function blink(selector) {
+              $(selector).fadeOut("slow", function() {
+                  $(this).fadeIn("slow", function() {
+                      if (window.stopBlinking > 0) {window.stopBlinking -= 1; blink(this);} else {$(this).show();}
+                  });
+              });
+          }
+					$("#shareboxTitle").html("Sharebox");
+          fixInputForiPhone();
+				},
+				maxThumbnailFilesize: 0
+			});
+      
+      function fixInputForiPhone()
+      {
+        if($("input").attr("multiple") != null) {
+          $("input").removeAttr("multiple");
+        }
+        $("input").attr("capture", "camera");
+      }
+      
+      fixInputForiPhone();
+
+			// sharebox text sync below
+			window.mutex = 0;
+			window.needpush = 0;
+
+			function tryPasting( str )
+			{
+				var result = b64_to_utf8(str);
+				$("#sharebox").val(result);
+			}
+
+			function pushAndPaste( str )
+			{
+				if(window.mutex != 0) {
+					return;
+				}
+				window.mutex = 1;
+				var to_upload = utf8_to_b64(str);
+				if(str == "__INIT__") to_upload = str;
+				var pertain_needpush = window.needpush;
+				if(window.needpush == 0) {
+					to_upload = "__INIT__"
+				} else {
+					window.needpush = 0;
+				}
+
+				$("#target").html(to_upload);
+
+				$.ajax({
+					type: "POST",
+					url: "gpClipboard",
+					timeout: 2000,
+					data: { "sharebox_post_board":to_upload },
+					success: function(data) {
+						if(window.mutex != -1) {
+							tryPasting(data);
+						}
+						window.mutex = 0;
+					},
+					error: function (XMLHttpRequest, textStatus, errorThrown) {
+						$("#target").html("error retrieving content");
+						window.needpush = pertain_needpush;
+						window.mutex = 0;
+					}
+				});
+			}
+      
+      function fileExtension(fname)
+      {
+        return fname.substr((Math.max(0, fname.lastIndexOf(".")) || Infinity) + 1);
+      }
+      
+      function fileNameFromPath(fname)
+      {
+        return fname.substr((Math.max(0, fname.lastIndexOf("/")) || Infinity) + 1);
+      }
+      
+      function fileLooksLikeImage(fname)
+      {
+        var myext = fileExtension(fname).toUpperCase();
+        if(myext == "PNG") {return true;}
+        if(myext == "GIF") {return true;}
+        if(myext == "JPEG") {return true;}
+        if(myext == "JPG") {return true;}
+        if(myext == "BMP") {return true;}
+        return false;
+      }
+      
+      function loadPreview()
+      {
+        $("#tagA").attr("href", window.filesrc);
+        $("#tagImg").attr("src", window.filesrc);
+        $("#imagePreview").fadeIn(400);
+      }
+      
+      function isValidImageUrl() {
+        $("<img>", {
+            src: window.filesrc,
+            error: function() {},
+            load: function() { loadPreview(); }
+        });
+      }
+      
+      window.downloadName = "gpFilenameNULL";
+      
+      function scanForDownload()
+      {
+				$.ajax({
+					type: "GET",
+					url: "gpFilename",
+					timeout: 2000,
+					success: function(data) {
+            if(window.downloadName != data) {
+              window.downloadName = data;
+              
+              window.filesrc = "gpFileDownload/" + data;
+              
+						  $("#downloadZone").html("<a target=\"_blank\" href=\"" + window.filesrc + "\">" + fileNameFromPath(window.downloadName) + "</a>");
+              
+              $("#imagePreview").fadeOut(400, function() {
+                if(fileLooksLikeImage(window.filesrc)) {isValidImageUrl();}
+              });
+              
+            }
+					},
+					error: function (XMLHttpRequest, textStatus, errorThrown) {
+					}
+				});
+      }
+
+			$(document).ready(function() {
+        var mypos = $("#targetPosition").position()
+        $("#mycontent").attr("style", "position:absolute; left:" + (mypos.left + 15) + "px; top:" + mypos.top + "px;");
+        var mywidth = $("#sharebox").width()
+        var myheight = $("#sharebox").height()
+        $("#imagePreview").attr("style", "position:absolute; height: " + Math.floor(myheight * 0.87) + "px; width:" + Math.floor(mywidth * 0.66) + "px; left:" + (mypos.left + 70 + mywidth) + "px; top:" + (mypos.top + Math.floor(myheight * 0.05)) + "px;");
+        $("#imagePreview").hide();
+        
+        $.ajaxSetup({ cache: false });
+        
+				setInterval(function() {
+					pushAndPaste($("#sharebox").val());
+				}, 1000);
+        
+				setInterval(function() {
+				  scanForDownload();
+				}, 1000);
+
+				$("#sharebox").on("input", function() {
+					window.needpush = 1;
+					if(window.mutex == 1) window.mutex = -1;
+				});
+
+			});
+
+			$("#target").hide();
+			pushAndPaste("__INIT__");
+		</script>
+	</body>
+</html>
