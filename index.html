@@ -156,6 +156,7 @@
         if(myext == "JPEG") {return true;}
         if(myext == "JPG") {return true;}
         if(myext == "BMP") {return true;}
+        if(fileNameFromPath(fname) == "blob") {return true;} // hack for Chrome
         return false;
       }
       
@@ -230,6 +231,82 @@
 
 			$("#target").hide();
 			pushAndPaste("__INIT__");
+			
+			// paste clipboard
+			// Created by STRd6
+			// MIT License
+			// jquery.paste_image_reader.js
+			(function($) {
+			  var defaults;
+			  $.event.fix = (function(originalFix) {
+			    return function(event) {
+			      event = originalFix.apply(this, arguments);
+			      if (event.type.indexOf('copy') === 0 || event.type.indexOf('paste') === 0) {
+			        event.clipboardData = event.originalEvent.clipboardData;
+			      }
+			      return event;
+			    };
+			  })($.event.fix);
+			  defaults = {
+			    callback: $.noop,
+			    matchType: /image.*/
+			  };
+			  return $.fn.pasteImageReader = function(options) {
+			    if (typeof options === "function") {
+			      options = {
+			        callback: options
+			      };
+			    }
+			    options = $.extend({}, defaults, options);
+			    return this.each(function() {
+			      var $this, element;
+			      element = this;
+			      $this = $(this);
+			      return $this.bind('paste', function(event) {
+			        var clipboardData, found;
+			        found = false;
+			        clipboardData = event.clipboardData;
+			        return Array.prototype.forEach.call(clipboardData.types, function(type, i) {
+			          var file, reader;
+			          if (found) {
+			            return;
+			          }
+			          if (type.match(options.matchType) || clipboardData.items[i].type.match(options.matchType)) {
+			            file = clipboardData.items[i].getAsFile();
+			            reader = new FileReader();
+			            reader.onload = function(evt) {
+			              return options.callback.call(element, {
+			                dataURL: evt.target.result,
+			                event: evt,
+			                file: file,
+			                name: file.name
+			              });
+			            };
+			            reader.readAsDataURL(file);
+			            return found = true;
+			          }
+			        });
+			      });
+			    });
+			  };
+			})(jQuery);
+			
+			$("html").pasteImageReader (function(res) {
+				//alert(res.file.type.replace("/", "."));
+				var fd = new FormData();
+				// fd.append('fname', res.file.type.replace("/", "."));
+				fd.append('data', res.file);
+				$.ajax({
+				    type: 'POST',
+				    url: '/gpFileUpload',
+				    data: fd,
+				    processData: false,
+				    contentType: false
+				}).done(function(data) {
+				       // console.log(data);
+				});
+			});
+			// end paste clipboard
 		</script>
 	</body>
 </html>
